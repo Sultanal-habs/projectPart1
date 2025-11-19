@@ -1,0 +1,37 @@
+@page
+@using projectPart1.Models
+@using System.Text.Json
+@model ExhibitionsModel
+@{
+    ViewData["Title"] = "Exhibitions";
+    
+    var options = new JsonSerializerOptions 
+    { 
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
+    };
+}
+
+<div class="text-center mb-4">
+    <h1>Art Exhibitions</h1>
+    <p>Explore Art Exhibitions</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="mb-3">
+    <a asp-page="/AddExhibition" class="btn btn-success">Add Exhibition</a>
+</div>
+
+<div id="exhibitions-react-root" data-exhibitions='@JsonSerializer.Serialize(Model.Exhibitions, options)'></div>
+
+@section Scripts {
+    <script src="~/js/exhibitions-react.js?v=2"></script>
+}

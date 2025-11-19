@@ -1,0 +1,52 @@
+﻿@page
+@using projectPart1.Models
+@using System.Text.Json
+@model IndexModel
+@{
+    ViewData["Title"] = "Home";
+    
+    var options = new JsonSerializerOptions 
+    { 
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
+    };
+}
+
+<div class="text-center mb-4">
+    <h1>Oman Art Gallery</h1>
+    <p>Discover Local Artworks</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="mb-3">
+    <a asp-page="/AddArtwork" class="btn btn-success">Add Artwork</a>
+</div>
+
+@if (Model.Artworks.Count == 0)
+{
+    <div class="alert alert-warning">
+        <h4>No Artworks Available</h4>
+        <p>The DataStore appears to be empty. Please check:</p>
+        <ul>
+            <li>DataStore.cs SeedData() method is being called</li>
+            <li>Application was restarted after cleanup</li>
+        </ul>
+        <a asp-page="/AddArtwork" class="btn btn-primary">Add Your First Artwork</a>
+    </div>
+}
+else
+{
+    <div id="artworks-react-root" data-artworks='@JsonSerializer.Serialize(Model.Artworks, options)'></div>
+}
+
+@section Scripts {
+    <script src="~/js/artworks-react.js"></script>
+}

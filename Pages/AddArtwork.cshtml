@@ -1,0 +1,86 @@
+@page
+@model AddArtworkModel
+@{
+    ViewData["Title"] = "Add Artwork";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h3 class="mb-4">Add Artwork</h3>
+
+        <form method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.Title" class="form-label">Title *</label>
+                <input asp-for="NewArtwork.Title" class="form-control" />
+                <span asp-validation-for="NewArtwork.Title" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.ArtistName" class="form-label">Artist Name *</label>
+                <input asp-for="NewArtwork.ArtistName" class="form-control" />
+                <span asp-validation-for="NewArtwork.ArtistName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.Description" class="form-label">Description *</label>
+                <textarea asp-for="NewArtwork.Description" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="NewArtwork.Description" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.Type" class="form-label">Type *</label>
+                <select asp-for="NewArtwork.Type" class="form-select">
+                    <option value="">Select type...</option>
+                    <option value="0">Painting</option>
+                    <option value="1">Photography</option>
+                    <option value="2">Handmade Craft</option>
+                </select>
+                <span asp-validation-for="NewArtwork.Type" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ImageFile" class="form-label">Upload Image *</label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger"></span>
+                <small class="form-text text-muted">Supported formats: JPG, PNG, GIF (Max 5MB)</small>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.Price" class="form-label">Price (OMR) *</label>
+                <input asp-for="NewArtwork.Price" type="number" class="form-control" step="0.01" />
+                <span asp-validation-for="NewArtwork.Price" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <div class="form-check">
+                    <input asp-for="NewArtwork.IsForSale" class="form-check-input" type="checkbox" />
+                    <label asp-for="NewArtwork.IsForSale" class="form-check-label">Available for sale</label>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.ArtistEmail" class="form-label">Email *</label>
+                <input asp-for="NewArtwork.ArtistEmail" type="email" class="form-control" />
+                <span asp-validation-for="NewArtwork.ArtistEmail" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="NewArtwork.ArtistPhone" class="form-label">Phone Number</label>
+                <input asp-for="NewArtwork.ArtistPhone" class="form-control" placeholder="+968 9123 4567" />
+                <span asp-validation-for="NewArtwork.ArtistPhone" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a asp-page="/Index" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

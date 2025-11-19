@@ -1,0 +1,24 @@
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+
+# Project-specific
+*.cache
+*.log
+appsettings.Development.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# Local environment
+.env
+.env.local
