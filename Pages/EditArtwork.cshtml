@@ -1,0 +1,140 @@
+@page "{id:int}"
+@model projectPart1.Pages.EditArtworkModel
+@{
+    ViewData["Title"] = "Edit Artwork";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Edit Artwork
+                    </h2>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> @Model.ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form method="post" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="EditArtwork.Id" />
+                        <input type="hidden" asp-for="CurrentImageUrl" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label asp-for="EditArtwork.Title" class="form-label">
+                                <i class="bi bi-card-heading"></i> Artwork Title *
+                            </label>
+                            <input asp-for="EditArtwork.Title" class="form-control" placeholder="Enter artwork title" required />
+                            <span asp-validation-for="EditArtwork.Title" class="text-danger"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label asp-for="EditArtwork.Description" class="form-label">
+                                <i class="bi bi-textarea-t"></i> Description *
+                            </label>
+                            <textarea asp-for="EditArtwork.Description" class="form-control" rows="4" placeholder="Describe the artwork..." required></textarea>
+                            <span asp-validation-for="EditArtwork.Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Artist Selection -->
+                        <div class="mb-3">
+                            <label asp-for="EditArtwork.ArtistId" class="form-label">
+                                <i class="bi bi-person"></i> Artist *
+                            </label>
+                            <select asp-for="EditArtwork.ArtistId" class="form-select" required>
+                                <option value="">-- Select Artist --</option>
+                                @foreach (var artist in Model.AvailableArtists)
+                                {
+                                    <option value="@artist.Id">@artist.Name (@artist.Email)</option>
+                                }
+                            </select>
+                            <span asp-validation-for="EditArtwork.ArtistId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Artwork Type -->
+                        <div class="mb-3">
+                            <label asp-for="EditArtwork.Type" class="form-label">
+                                <i class="bi bi-palette"></i> Artwork Type *
+                            </label>
+                            <select asp-for="EditArtwork.Type" class="form-select" required>
+                                <option value="">-- Select Type --</option>
+                                <option value="0">Painting</option>
+                                <option value="1">Photography</option>
+                                <option value="2">Handmade Craft</option>
+                                <option value="3">Sculpture</option>
+                                <option value="4">Digital Art</option>
+                            </select>
+                            <span asp-validation-for="EditArtwork.Type" class="text-danger"></span>
+                        </div>
+
+                        <!-- Current Image Preview -->
+                        @if (!string.IsNullOrEmpty(Model.CurrentImageUrl))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Current Image</label>
+                                <div>
+                                    <img src="@Model.CurrentImageUrl" alt="Current artwork" class="img-thumbnail" style="max-height: 200px;" />
+                                </div>
+                            </div>
+                        }
+
+                        <!-- New Image Upload -->
+                        <div class="mb-3">
+                            <label asp-for="NewImageFile" class="form-label">
+                                <i class="bi bi-image"></i> Upload New Image (Optional)
+                            </label>
+                            <input asp-for="NewImageFile" type="file" class="form-control" accept="image/*" />
+                            <span asp-validation-for="NewImageFile" class="text-danger"></span>
+                            <small class="text-muted">Allowed: JPG, JPEG, PNG, GIF (Max 5MB)</small>
+                        </div>
+
+                        <!-- Price and For Sale -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="EditArtwork.Price" class="form-label">
+                                    <i class="bi bi-currency-exchange"></i> Price (OMR)
+                                </label>
+                                <input asp-for="EditArtwork.Price" type="number" step="0.01" min="0" max="999999" class="form-control" placeholder="0.00" />
+                                <span asp-validation-for="EditArtwork.Price" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label d-block">&nbsp;</label>
+                                <div class="form-check">
+                                    <input asp-for="EditArtwork.IsForSale" type="checkbox" class="form-check-input" />
+                                    <label asp-for="EditArtwork.IsForSale" class="form-check-label">
+                                        Available for Sale
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="/Index" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Artwork
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

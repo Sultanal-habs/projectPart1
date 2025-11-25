@@ -1,8 +1,14 @@
 using projectPart1.Services;
+using projectPart1.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+
+// Add DatabaseHelper for direct SQL access
+builder.Services.AddScoped<DatabaseHelper>();
+
+// Keep legacy services for backward compatibility (will be replaced gradually)
 builder.Services.AddSingleton<DataStore>();
 builder.Services.AddScoped<ArtworkService>();
 builder.Services.AddScoped<ArtistService>();
@@ -36,18 +42,26 @@ app.UseCors("AllowReact");
 app.UseAuthorization();
 app.MapRazorPages();
 
+// Test database connection on startup
 using (var scope = app.Services.CreateScope())
 {
-    var dataStore = scope.ServiceProvider.GetRequiredService<DataStore>();
-    Console.WriteLine("========================================");
-    Console.WriteLine("تحقق من البيانات:");
-    int artworksCount = dataStore.Artworks.Count;
-    int artistsCount = dataStore.Artists.Count;
-    int exhibitionsCount = dataStore.Exhibitions.Count;
-    Console.WriteLine($"عدد الأعمال الفنية: {artworksCount}");
-    Console.WriteLine($"عدد الفنانين: {artistsCount}");
-    Console.WriteLine($"عدد المعارض: {exhibitionsCount}");
-    Console.WriteLine("========================================");
+    var dbHelper = scope.ServiceProvider.GetRequiredService<DatabaseHelper>();
+    bool isConnected = await dbHelper.TestConnectionAsync();
+    
+    if (isConnected)
+    {
+        Console.WriteLine("========================================");
+        Console.WriteLine("Database Connection: SUCCESS");
+        Console.WriteLine("Database: ArtGalleryDB");
+        Console.WriteLine("========================================");
+    }
+    else
+    {
+        Console.WriteLine("========================================");
+        Console.WriteLine("WARNING: Database connection failed!");
+        Console.WriteLine("Check connection string in appsettings.json");
+        Console.WriteLine("========================================");
+    }
 }
 
 app.Run();
