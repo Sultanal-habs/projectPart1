@@ -5,11 +5,25 @@ obj/
 *.user
 *.suo
 *.sln.docstates
+*.csproj.user
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
 
 # Project-specific
 *.cache
 *.log
 appsettings.Development.json
+*.pdf
+*.tmp
 
 # OS
 .DS_Store
@@ -18,7 +32,14 @@ Thumbs.db
 # NuGet
 *.nupkg
 *.snupkg
+packages/
 
 # Local environment
 .env
 .env.local
+
+# Temporary files
+*~
+*.bak
+*.old
+*.swp
