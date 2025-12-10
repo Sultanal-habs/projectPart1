@@ -50,6 +50,11 @@ function ArtistsDirectory({ initialArtists }) {
         return statuses[status] || 'Unknown';
     };
 
+    const handleImageError = (e) => {
+        e.target.src = '/images/artists/default.svg';
+        e.target.onerror = null; // Prevent infinite loop
+    };
+
     return React.createElement('div', { className: 'artists-directory-container' },
         React.createElement('div', { className: 'row mb-4' },
             React.createElement('div', { className: 'col-md-6' },
@@ -84,9 +89,11 @@ function ArtistsDirectory({ initialArtists }) {
                     React.createElement('div', { key: artist.id, className: 'col-md-4' },
                         React.createElement('div', { className: 'card h-100' },
                             React.createElement('img', {
-                                src: artist.profileImageUrl,
+                                src: artist.profileImageUrl || '/images/artists/default.svg',
                                 className: 'card-img-top artist-profile-img',
-                                alt: artist.name
+                                alt: artist.name,
+                                onError: handleImageError,
+                                loading: 'lazy'
                             }),
                             React.createElement('div', { className: 'card-body' },
                                 React.createElement('h5', { className: 'card-title' }, artist.name),

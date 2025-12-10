@@ -111,6 +111,11 @@ function ArtworksGallery({ initialArtworks }) {
         return date.toLocaleDateString('en-US',options);
     };
 
+    const handleImageError=(e)=>{
+        e.target.src='/images/placeholder-artwork.svg';
+        e.target.onerror=null;
+    };
+
     console.log('Rendering with',filteredArtworks.length,'artworks');
 
     return React.createElement('div',{className:'artworks-gallery-container'},
@@ -163,7 +168,9 @@ function ArtworksGallery({ initialArtworks }) {
                                 src:artwork.imageUrl,
                                 className:'card-img-top',
                                 alt:artwork.title,
-                                style:{height:'250px',objectFit:'cover'}
+                                style:{height:'250px',objectFit:'cover'},
+                                onError:handleImageError,
+                                loading:'lazy'
                             }),
                             React.createElement('div',{className:'card-body'},
                                 React.createElement('h5',{className:'card-title'},artwork.title),
@@ -184,7 +191,7 @@ function ArtworksGallery({ initialArtworks }) {
                                     formatDate(artwork.createdDate)
                                 ),
                                 React.createElement('a',{
-                                    href:`/ArtworkDetails?id=${artwork.id}`,
+                                    href:`/ArtworkDetails/${artwork.id}`,
                                     className:'btn btn-outline-primary btn-sm w-100'
                                 },'View Details')
                             )

@@ -4,7 +4,6 @@
 @model ArtistsModel
 @{
     ViewData["Title"] = "Artists";
-    
     var options = new JsonSerializerOptions 
     { 
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase 
@@ -16,23 +15,12 @@
     <p>Meet Our Talented Artists</p>
 </div>
 
-@if (!string.IsNullOrEmpty(Model.SuccessMessage))
-{
-    <div class="alert alert-success">@Model.SuccessMessage</div>
-}
-
-@if (!string.IsNullOrEmpty(Model.ErrorMessage))
-{
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
-
 <div class="mb-3">
     <a asp-page="/AddArtist" class="btn btn-success">Add Artist</a>
 </div>
 
-<!-- React Component Container -->
 <div id="artists-react-root" data-artists='@JsonSerializer.Serialize(Model.Artists, options)'></div>
 
 @section Scripts {
-    <script src="~/js/artists-react.js"></script>
+    <script src="~/js/artists-react.js?v=@DateTime.Now.Ticks"></script>
 }

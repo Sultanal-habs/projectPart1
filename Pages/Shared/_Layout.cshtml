@@ -1,52 +1,84 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Oman Art Gallery</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3 shadow-sm">
             <div class="container">
-                <a class="navbar-brand" asp-page="/Index">Oman Art Gallery</a>
+                <a class="navbar-brand" asp-page="/Index">
+                    <i class="bi bi-palette"></i> Oman Art Gallery
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse">
+                <div class="navbar-collapse collapse justify-content-between">
                     <ul class="navbar-nav">
                         <li class="nav-item">
-                            <a class="nav-link" asp-page="/Index">Artworks</a>
+                            <a class="nav-link" asp-page="/Index">
+                                <i class="bi bi-images"></i> Artworks
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-page="/Artists">Artists</a>
+                            <a class="nav-link" asp-page="/Artists">
+                                <i class="bi bi-people"></i> Artists
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" asp-page="/Exhibitions">Exhibitions</a>
+                            <a class="nav-link" asp-page="/Exhibitions">
+                                <i class="bi bi-calendar-event"></i> Exhibitions
+                            </a>
                         </li>
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <partial name="_LoginPartial" />
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
     <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle"></i> @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
         <main class="pb-3">
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top text-center">
+    <footer class="border-top text-center py-3 mt-5 bg-light">
         <div class="container">
-            &copy; 2025 - Oman Art Gallery
+            <p class="mb-0">
+                &copy; 2025 - Oman Art Gallery | 
+                <a href="/Privacy" class="text-decoration-none">Privacy</a> | 
+                <a href="/About" class="text-decoration-none">About</a>
+            </p>
+            <small class="text-muted">
+                Built with ASP.NET Core, Entity Framework & SQL Server
+            </small>
         </div>
     </footer>
-
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
-</html></html></html>
+</html>

@@ -4,36 +4,28 @@ using Microsoft.Data.SqlClient;
 using projectPart1.Models;
 using projectPart1.Data;
 using System.Data;
-
 namespace projectPart1.Pages
 {
     public class ArtistsModel : PageModel
     {
         private readonly DatabaseHelper dbHelper;
         private readonly ILogger<ArtistsModel> logger;
-
         public ArtistsModel(DatabaseHelper dbHelper, ILogger<ArtistsModel> logger)
         {
             this.dbHelper = dbHelper;
             this.logger = logger;
         }
-
         public List<Artist> Artists { get; set; } = new List<Artist>();
-
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; }
-
         [TempData]
         public string? SuccessMessage { get; set; }
-
         [TempData]
         public string? ErrorMessage { get; set; }
-
         public async Task OnGetAsync()
         {
             try
             {
-                // Direct SQL SELECT with parameterized query using database view
                 string query = @"
                     SELECT 
                         ArtistId, ArtistName, Email, Phone, Bio, ProfileImageUrl,
@@ -41,10 +33,7 @@ namespace projectPart1.Pages
                         AverageLikesPerArtwork, ExhibitionsParticipated
                     FROM vw_ArtistPortfolio
                     WHERE StatusName = 'Active'";
-
                 List<SqlParameter> parameters = new List<SqlParameter>();
-
-                // Add search filter with parameterized query
                 if (!string.IsNullOrWhiteSpace(SearchTerm))
                 {
                     query += " AND (ArtistName LIKE @SearchTerm OR Email LIKE @SearchTerm OR Bio LIKE @SearchTerm)";
@@ -54,15 +43,9 @@ namespace projectPart1.Pages
                     });
                     logger.LogInformation("Searching artists with term: {SearchTerm}", SearchTerm);
                 }
-
                 query += " ORDER BY TotalLikes DESC, JoinedDate DESC";
-
-                // Execute parameterized SELECT query
                 DataTable dataTable = await dbHelper.ExecuteQueryAsync(query, parameters.ToArray());
-
-                // Map DataTable to Artist objects
                 Artists = MapDataTableToArtists(dataTable);
-
                 logger.LogInformation("Retrieved {Count} active artists from database", Artists.Count);
             }
             catch (InvalidOperationException ex)
@@ -84,14 +67,9 @@ namespace projectPart1.Pages
                 Artists = new List<Artist>();
             }
         }
-
-        /// <summary>
-        /// Map DataTable rows to Artist objects with proper null handling
-        /// </summary>
         private List<Artist> MapDataTableToArtists(DataTable dataTable)
         {
             List<Artist> artists = new List<Artist>();
-
             foreach (DataRow row in dataTable.Rows)
             {
                 try
@@ -109,7 +87,6 @@ namespace projectPart1.Pages
                             : DateTime.Now,
                         Status = row["StatusName"]?.ToString() == "Active" ? ArtistStatus.Active : ArtistStatus.Inactive
                     };
-
                     artists.Add(artist);
                 }
                 catch (Exception ex)
@@ -117,8 +94,7 @@ namespace projectPart1.Pages
                     logger.LogWarning(ex, "Error mapping artist row, skipping");
                 }
             }
-
             return artists;
         }
     }
-}
+}

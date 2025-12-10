@@ -3,7 +3,6 @@
 @{
     ViewData["Title"] = "Add New Artwork";
 }
-
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -16,8 +15,6 @@
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-                        <!-- Title -->
                         <div class="mb-3">
                             <label asp-for="NewArtwork.Title" class="form-label">
                                 <i class="bi bi-card-heading"></i> Artwork Title *
@@ -25,8 +22,6 @@
                             <input asp-for="NewArtwork.Title" class="form-control" placeholder="Enter artwork title" required />
                             <span asp-validation-for="NewArtwork.Title" class="text-danger"></span>
                         </div>
-
-                        <!-- Description -->
                         <div class="mb-3">
                             <label asp-for="NewArtwork.Description" class="form-label">
                                 <i class="bi bi-textarea-t"></i> Description *
@@ -34,8 +29,6 @@
                             <textarea asp-for="NewArtwork.Description" class="form-control" rows="4" placeholder="Describe your artwork..." required></textarea>
                             <span asp-validation-for="NewArtwork.Description" class="text-danger"></span>
                         </div>
-
-                        <!-- Artist Selection (NEW - from database) -->
                         <div class="mb-3">
                             <label asp-for="NewArtwork.ArtistId" class="form-label">
                                 <i class="bi bi-person"></i> Select Artist *
@@ -50,8 +43,6 @@
                             <span asp-validation-for="NewArtwork.ArtistId" class="text-danger"></span>
                             <small class="text-muted">Artists are loaded from database</small>
                         </div>
-
-                        <!-- Artwork Type -->
                         <div class="mb-3">
                             <label asp-for="NewArtwork.Type" class="form-label">
                                 <i class="bi bi-palette"></i> Artwork Type *
@@ -66,8 +57,6 @@
                             </select>
                             <span asp-validation-for="NewArtwork.Type" class="text-danger"></span>
                         </div>
-
-                        <!-- Image Upload -->
                         <div class="mb-3">
                             <label asp-for="ImageFile" class="form-label">
                                 <i class="bi bi-image"></i> Upload Image
@@ -76,8 +65,6 @@
                             <span asp-validation-for="ImageFile" class="text-danger"></span>
                             <small class="text-muted">Allowed: JPG, JPEG, PNG, GIF (Max 5MB)</small>
                         </div>
-
-                        <!-- Price and Sale Status -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label asp-for="NewArtwork.Price" class="form-label">
@@ -86,7 +73,6 @@
                                 <input asp-for="NewArtwork.Price" type="number" step="0.01" min="0" max="999999" class="form-control" placeholder="0.00" />
                                 <span asp-validation-for="NewArtwork.Price" class="text-danger"></span>
                             </div>
-
                             <div class="col-md-6 mb-3">
                                 <label class="form-label d-block">&nbsp;</label>
                                 <div class="form-check">
@@ -97,8 +83,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Submit Buttons -->
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                             <a href="/Index" class="btn btn-secondary">
                                 <i class="bi bi-x-circle"></i> Cancel
@@ -110,7 +94,6 @@
                     </form>
                 </div>
             </div>
-
             <div class="alert alert-info mt-3">
                 <i class="bi bi-info-circle"></i> 
                 <strong>Note:</strong> All fields marked with * are required. The artwork will be saved directly to the SQL Server database.
@@ -118,8 +101,6 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-}
-
+}

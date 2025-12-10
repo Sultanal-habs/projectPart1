@@ -121,6 +121,11 @@ function ExhibitionsGallery({ initialExhibitions }) {
         return '';
     };
 
+    const handleImageError = (e) => {
+        e.target.src = '/images/exhibitions/default-banner.jpg';
+        e.target.onerror = null; // Prevent infinite loop
+    };
+
     return React.createElement('div', { className: 'exhibitions-gallery-container' },
         React.createElement('div', { className: 'row mb-4' },
             React.createElement('div', { className: 'col-md-4' },
@@ -168,9 +173,11 @@ function ExhibitionsGallery({ initialExhibitions }) {
                         React.createElement('div', { className: 'row g-0' },
                             React.createElement('div', { className: 'col-md-4' },
                                 React.createElement('img', {
-                                    src: exhibition.bannerImageUrl,
+                                    src: exhibition.bannerImageUrl || '/images/exhibitions/default-banner.jpg',
                                     className: 'exhibition-banner',
-                                    alt: exhibition.name
+                                    alt: exhibition.name,
+                                    onError: handleImageError,
+                                    loading: 'lazy'
                                 })
                             ),
                             React.createElement('div', { className: 'col-md-8' },

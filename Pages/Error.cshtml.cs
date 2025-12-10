@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Diagnostics;
-
 namespace projectPart1.Pages
 {
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -12,14 +11,11 @@ namespace projectPart1.Pages
         public string? ErrorMessage { get; set; }
         public string? ErrorDetails { get; set; }
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
-
         private readonly ILogger<ErrorModel> _logger;
-
         public ErrorModel(ILogger<ErrorModel> logger)
         {
             _logger = logger;
         }
-
         public void OnGet()
         {
             try
@@ -35,4 +31,4 @@ namespace projectPart1.Pages
             }
         }
     }
-}
+}

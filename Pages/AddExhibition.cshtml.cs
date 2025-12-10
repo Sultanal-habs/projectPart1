@@ -1,101 +1,104 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using projectPart1.Models;
 using projectPart1.Services;
+using projectPart1.Data;
 
 namespace projectPart1.Pages
 {
     public class AddExhibitionModel : PageModel
     {
-        private readonly ExhibitionService exhibitionService;
-        private readonly FileUploadService fileUploadService;
-        private readonly ILogger<AddExhibitionModel> logger;
+        private readonly ArtGalleryDbContext _context;
+        private readonly FileUploadService _fileUploadService;
+        private readonly ILogger<AddExhibitionModel> _logger;
 
-        public AddExhibitionModel(ExhibitionService exhibitionService,FileUploadService fileUploadService,ILogger<AddExhibitionModel> logger)
+        public AddExhibitionModel(ArtGalleryDbContext context, FileUploadService fileUploadService, ILogger<AddExhibitionModel> logger)
         {
-            this.exhibitionService=exhibitionService;
-            this.fileUploadService=fileUploadService;
-            this.logger =logger;
+            _context = context;
+            _fileUploadService = fileUploadService;
+            _logger = logger;
         }
 
         [BindProperty]
-        public Exhibition NewExhibition{get;set;}=new Exhibition();
+        public Exhibition NewExhibition { get; set; } = new Exhibition();
 
         [BindProperty]
-        public IFormFile BannerImageFile{get;set;}
+        public IFormFile? BannerImageFile { get; set; }
 
         public void OnGet()
         {
-            DateTime today=DateTime.Today;
-            NewExhibition.StartDate=today.AddDays(7);
-            NewExhibition.EndDate =today.AddDays(37);
+            DateTime today = DateTime.Today;
+            NewExhibition.StartDate = today.AddDays(7);
+            NewExhibition.EndDate = today.AddDays(37);
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             try
             {
-                bool isValid=ModelState.IsValid;
-                if(!isValid)
+                if (!ModelState.IsValid)
                 {
-                    logger.LogWarning("Model state is invalid");
+                    _logger.LogWarning("Model state is invalid");
                     return Page();
                 }
 
-                DateTime today=DateTime.Today;
-                if(NewExhibition.StartDate<today)
+                DateTime today = DateTime.Today;
+                if (NewExhibition.StartDate < today)
                 {
-                    ModelState.AddModelError("NewExhibition.StartDate","Start date must be in the future");
+                    ModelState.AddModelError("NewExhibition.StartDate", "Start date must be in the future");
                     return Page();
                 }
 
-                if(NewExhibition.EndDate<=NewExhibition.StartDate)
+                if (NewExhibition.EndDate <= NewExhibition.StartDate)
                 {
-                    ModelState.AddModelError("NewExhibition.EndDate","End date must be after start date");
+                    ModelState.AddModelError("NewExhibition.EndDate", "End date must be after start date");
                     return Page();
                 }
 
-                TimeSpan diff=NewExhibition.EndDate-NewExhibition.StartDate;
-                int days=diff.Days;
+                TimeSpan diff = NewExhibition.EndDate - NewExhibition.StartDate;
+                int days = diff.Days;
                 
-                if(days<1)
+                if (days < 1)
                 {
-                    ModelState.AddModelError("","Exhibition must be at least one day");
+                    ModelState.AddModelError("", "Exhibition must be at least one day");
                     return Page();
                 }
 
-                if(days>365)
+                if (days > 365)
                 {
-                    ModelState.AddModelError("","Exhibition cannot be longer than one year");
+                    ModelState.AddModelError("", "Exhibition cannot be longer than one year");
                     return Page();
                 }
 
-                if(BannerImageFile!=null&&BannerImageFile.Length>0)
+                // Handle image upload
+                if (BannerImageFile != null && BannerImageFile.Length > 0)
                 {
-                    string imagePath=await fileUploadService.UploadImageAsync(BannerImageFile,"exhibitions");
-                    NewExhibition.BannerImageUrl=imagePath;
+                    string imagePath = await _fileUploadService.UploadImageAsync(BannerImageFile, "exhibitions");
+                    NewExhibition.BannerImageUrl = imagePath;
                 }
                 else
                 {
-                    NewExhibition.BannerImageUrl="/images/exhibitions/default.jpg";
+                    NewExhibition.BannerImageUrl = "/images/exhibitions/default.jpg";
                 }
 
-                exhibitionService.AddExhibition(NewExhibition);
-                logger.LogInformation("Exhibition added: {Name}",NewExhibition.Name);
+                // Set defaults
+                NewExhibition.CreatedDate = DateTime.Now;
+                NewExhibition.Status = ExhibitionStatus.Upcoming;
+
+                // Add to database
+                _context.Exhibitions.Add(NewExhibition);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Exhibition added: {Name}", NewExhibition.Name);
+                TempData["SuccessMessage"] = $"Exhibition '{NewExhibition.Name}' created successfully!";
                 
-                TempData["SuccessMessage"]=$"Exhibition '{NewExhibition.Name}' created successfully!";
                 return RedirectToPage("/Exhibitions");
             }
-            catch(ArgumentException ex)
+            catch (Exception ex)
             {
-                logger.LogWarning(ex,"Validation error adding exhibition");
-                ModelState.AddModelError("",ex.Message);
-                return Page();
-            }
-            catch(Exception ex)
-            {
-                logger.LogError(ex,"Error adding exhibition");
-                ModelState.AddModelError("","An error occurred. Please try again.");
+                _logger.LogError(ex, "Error adding exhibition");
+                ModelState.AddModelError("", "An error occurred. Please try again.");
                 return Page();
             }
         }
