@@ -1,0 +1,116 @@
+@model List<Exhibition>
+@{
+    ViewData["Title"] = "Browse Exhibitions";
+    Layout = "_UserLayout";
+}
+
+<div class="container py-4">
+    <h1 class="mb-4"><i class="bi bi-calendar-event me-2"></i>Browse Exhibitions</h1>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search exhibitions...">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="0" selected="@(ViewBag.Status == 0)">Upcoming</option>
+                        <option value="1" selected="@(ViewBag.Status == 1)">Active</option>
+                        <option value="2" selected="@(ViewBag.Status == 2)">Ended</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exhibitions Grid -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var exhibition in Model)
+            {
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="row g-0">
+                            <div class="col-md-5">
+                                @if (!string.IsNullOrEmpty(exhibition.BannerImageUrl))
+                                {
+                                    <img src="@exhibition.BannerImageUrl" class="img-fluid rounded-start h-100" alt="@exhibition.Name" style="object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="bg-gradient bg-primary bg-opacity-25 h-100 d-flex align-items-center justify-content-center" style="min-height: 200px;">
+                                        <i class="bi bi-calendar-event display-3 text-primary"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-md-7">
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        @if (exhibition.IsActive())
+                                        {
+                                            <span class="badge bg-success">Active Now</span>
+                                        }
+                                        else if (exhibition.IsUpcoming())
+                                        {
+                                            <span class="badge bg-info">Upcoming</span>
+                                        }
+                                        else if (exhibition.IsEnded())
+                                        {
+                                            <span class="badge bg-secondary">Ended</span>
+                                        }
+                                    </div>
+                                    <h5 class="card-title">@exhibition.Name</h5>
+                                    <p class="card-text small text-muted">
+                                        @(exhibition.Description.Length > 100 ? exhibition.Description.Substring(0, 100) + "..." : exhibition.Description)
+                                    </p>
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-1">
+                                            <i class="bi bi-calendar text-primary me-2"></i>
+                                            @exhibition.StartDate.ToString("MMM dd") - @exhibition.EndDate.ToString("MMM dd, yyyy")
+                                        </li>
+                                        @if (!string.IsNullOrEmpty(exhibition.Location))
+                                        {
+                                            <li class="mb-1">
+                                                <i class="bi bi-geo-alt text-danger me-2"></i>
+                                                @exhibition.Location
+                                            </li>
+                                        }
+                                        @if (exhibition.IsActive() || exhibition.IsUpcoming())
+                                        {
+                                            <li>
+                                                <i class="bi bi-clock text-info me-2"></i>
+                                                @exhibition.GetDaysRemaining() days remaining
+                                            </li>
+                                        }
+                                    </ul>
+                                    <a asp-action="ExhibitionDetails" asp-route-id="@exhibition.Id" class="btn btn-sm btn-outline-primary mt-2">
+                                        View Details <i class="bi bi-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-x display-1 text-muted"></i>
+            <h3 class="mt-3">No exhibitions found</h3>
+            <p class="text-muted">Check back later for upcoming exhibitions.</p>
+        </div>
+    }
+</div>

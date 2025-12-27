@@ -1,0 +1,184 @@
+@model UserHomeViewModel
+@{
+    ViewData["Title"] = "Home";
+    Layout = "_UserLayout";
+}
+
+<!-- Hero Section -->
+<section class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-3">Discover Omani Art</h1>
+        <p class="lead mb-4">Explore beautiful artworks from talented local artists</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a asp-action="Artworks" class="btn btn-light btn-lg">
+                <i class="bi bi-images me-2"></i>Browse Artworks
+            </a>
+            <a asp-action="Artists" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-people me-2"></i>Meet Artists
+            </a>
+        </div>
+    </div>
+</section>
+
+<div class="container py-5">
+    <!-- Featured Artworks -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-star me-2 text-warning"></i>Featured Artworks</h2>
+            <a asp-action="Artworks" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var artwork in Model.FeaturedArtworks)
+            {
+                <div class="col-md-4">
+                    <div class="card artwork-card h-100">
+                        @if (!string.IsNullOrEmpty(artwork.ImageUrl))
+                        {
+                            <img src="@artwork.ImageUrl" class="card-img-top" alt="@artwork.Title">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="bi bi-image text-muted display-4"></i>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@artwork.Title</h5>
+                            <p class="card-text text-muted small">
+                                by @artwork.Artist?.Name
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">@artwork.Type</span>
+                                <span class="text-danger">
+                                    <i class="bi bi-heart-fill"></i> @artwork.Likes
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-action="ArtworkDetails" asp-route-id="@artwork.Id" class="btn btn-sm btn-outline-primary w-100">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Recent Artworks -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-clock me-2 text-info"></i>Recent Artworks</h2>
+            <a asp-action="Artworks" asp-route-sortBy="newest" class="btn btn-outline-info">View All</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var artwork in Model.RecentArtworks)
+            {
+                <div class="col-md-4 col-lg-2">
+                    <div class="card artwork-card h-100">
+                        @if (!string.IsNullOrEmpty(artwork.ImageUrl))
+                        {
+                            <img src="@artwork.ImageUrl" class="card-img-top" alt="@artwork.Title" style="height: 150px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                <i class="bi bi-image text-muted"></i>
+                            </div>
+                        }
+                        <div class="card-body p-2">
+                            <h6 class="card-title mb-1" style="font-size: 0.9rem;">@artwork.Title</h6>
+                            <small class="text-muted">@artwork.Artist?.Name</small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Upcoming Exhibitions -->
+    @if (Model.UpcomingExhibitions.Any())
+    {
+        <section class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-calendar-event me-2 text-success"></i>Upcoming Exhibitions</h2>
+                <a asp-action="Exhibitions" class="btn btn-outline-success">View All</a>
+            </div>
+            <div class="row g-4">
+                @foreach (var exhibition in Model.UpcomingExhibitions)
+                {
+                    <div class="col-md-4">
+                        <div class="card h-100 border-success">
+                            @if (!string.IsNullOrEmpty(exhibition.BannerImageUrl))
+                            {
+                                <img src="@exhibition.BannerImageUrl" class="card-img-top" alt="@exhibition.Name" style="height: 150px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-success bg-opacity-10 d-flex align-items-center justify-content-center" style="height: 150px;">
+                                    <i class="bi bi-calendar-event text-success display-4"></i>
+                                </div>
+                            }
+                            <div class="card-body">
+                                <span class="badge @(exhibition.IsActive() ? "bg-success" : "bg-info") mb-2">
+                                    @(exhibition.IsActive() ? "Active Now" : "Upcoming")
+                                </span>
+                                <h5 class="card-title">@exhibition.Name</h5>
+                                <p class="card-text small text-muted">
+                                    <i class="bi bi-geo-alt"></i> @(string.IsNullOrEmpty(exhibition.Location) ? "TBA" : exhibition.Location)
+                                </p>
+                                <p class="card-text small">
+                                    <i class="bi bi-calendar"></i> @exhibition.StartDate.ToString("MMM dd") - @exhibition.EndDate.ToString("MMM dd, yyyy")
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a asp-action="ExhibitionDetails" asp-route-id="@exhibition.Id" class="btn btn-sm btn-outline-success w-100">
+                                    Learn More
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+
+    <!-- Featured Artists -->
+    <section>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-people me-2 text-primary"></i>Featured Artists</h2>
+            <a asp-action="Artists" class="btn btn-outline-primary">View All</a>
+        </div>
+        <div class="row g-4">
+            @foreach (var artist in Model.FeaturedArtists)
+            {
+                <div class="col-md-3">
+                    <div class="card artist-card h-100 text-center">
+                        <div class="card-body">
+                            @if (!string.IsNullOrEmpty(artist.ProfileImageUrl))
+                            {
+                                <img src="@artist.ProfileImageUrl" alt="@artist.Name" class="rounded-circle mb-3" style="width: 80px; height: 80px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center text-white" style="width: 80px; height: 80px;">
+                                    <span class="display-6">@artist.Name.Substring(0, 1).ToUpper()</span>
+                                </div>
+                            }
+                            <h5 class="card-title">@artist.Name</h5>
+                            <p class="text-muted small mb-2">
+                                @artist.GetTotalArtworks() artworks
+                            </p>
+                            <div class="mb-3">
+                                <span class="badge bg-danger"><i class="bi bi-heart-fill"></i> @artist.GetTotalLikes() likes</span>
+                            </div>
+                            <a asp-action="ArtistDetails" asp-route-id="@artist.Id" class="btn btn-sm btn-outline-primary">
+                                View Profile
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+</div>

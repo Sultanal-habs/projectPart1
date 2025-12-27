@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Art Gallery API Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        .artwork-card img { height: 200px; object-fit: cover; }
+        .loading { display: none; }
+        .loading.show { display: block; }
+        #results { min-height: 300px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container">
+            <span class="navbar-brand">
+                <i class="bi bi-cloud-arrow-down me-2"></i>Art Gallery API Client
+            </span>
+        </div>
+    </nav>
+
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    This is a remote web-based application that interacts with the Art Gallery Web API.
+                    It demonstrates Search, Add, Update, and Delete operations via API endpoints.
+                </div>
+            </div>
+        </div>
+
+        <!-- API Endpoint Tabs -->
+        <ul class="nav nav-tabs mb-4" id="apiTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="artworks-tab" data-bs-toggle="tab" data-bs-target="#artworks" type="button">
+                    <i class="bi bi-images me-1"></i> Artworks
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="artists-tab" data-bs-toggle="tab" data-bs-target="#artists" type="button">
+                    <i class="bi bi-people me-1"></i> Artists
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="exhibitions-tab" data-bs-toggle="tab" data-bs-target="#exhibitions" type="button">
+                    <i class="bi bi-calendar-event me-1"></i> Exhibitions
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="apiTabsContent">
+            <!-- Artworks Tab -->
+            <div class="tab-pane fade show active" id="artworks" role="tabpanel">
+                <!-- Search Artworks -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-search me-2"></i>Search Artworks (GET /api/ArtGalleryApi/artworks)
+                    </div>
+                    <div class="card-body">
+                        <form id="searchArtworksForm" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" id="artworkSearch" class="form-control" placeholder="Search term...">
+                            </div>
+                            <div class="col-md-3">
+                                <select id="artworkType" class="form-select">
+                                    <option value="">All Types</option>
+                                    <option value="0">Painting</option>
+                                    <option value="1">Photography</option>
+                                    <option value="2">Handmade Craft</option>
+                                    <option value="3">Sculpture</option>
+                                    <option value="4">Digital Art</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select id="artworkSort" class="form-select">
+                                    <option value="newest">Newest</option>
+                                    <option value="mostLiked">Most Liked</option>
+                                    <option value="title">Title A-Z</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search me-1"></i> Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Add Artwork -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-plus-circle me-2"></i>Add Artwork (POST /api/ArtGalleryApi/artworks)
+                    </div>
+                    <div class="card-body">
+                        <form id="addArtworkForm" class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" id="newArtworkTitle" class="form-control" placeholder="Title *" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="number" id="newArtworkArtistId" class="form-control" placeholder="Artist ID *" required>
+                            </div>
+                            <div class="col-md-12">
+                                <textarea id="newArtworkDescription" class="form-control" placeholder="Description (min 10 chars) *" required></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="newArtworkType" class="form-select" required>
+                                    <option value="">Select Type *</option>
+                                    <option value="Painting">Painting</option>
+                                    <option value="Photography">Photography</option>
+                                    <option value="HandmadeCraft">Handmade Craft</option>
+                                    <option value="Sculpture">Sculpture</option>
+                                    <option value="DigitalArt">Digital Art</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="newArtworkPrice" class="form-control" placeholder="Price (optional)" step="0.01">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="bi bi-plus-circle me-1"></i> Add Artwork
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Update/Delete Artwork -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning">
+                        <i class="bi bi-pencil me-2"></i>Update/Delete Artwork
+                    </div>
+                    <div class="card-body">
+                        <form id="updateArtworkForm" class="row g-3">
+                            <div class="col-md-2">
+                                <input type="number" id="updateArtworkId" class="form-control" placeholder="Artwork ID *" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="updateArtworkTitle" class="form-control" placeholder="New Title">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" id="updateArtworkPrice" class="form-control" placeholder="New Price" step="0.01">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-warning w-100">Update</button>
+                            </div>
+                        </form>
+                        <hr>
+                        <form id="deleteArtworkForm" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="number" id="deleteArtworkId" class="form-control" placeholder="Artwork ID to delete *" required>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash me-1"></i> Delete Artwork
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div id="artworkResults" class="mt-4"></div>
+            </div>
+
+            <!-- Artists Tab -->
+            <div class="tab-pane fade" id="artists" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-search me-2"></i>Search Artists (GET /api/ArtGalleryApi/artists)
+                    </div>
+                    <div class="card-body">
+                        <form id="searchArtistsForm" class="row g-3">
+                            <div class="col-md-8">
+                                <input type="text" id="artistSearch" class="form-control" placeholder="Search artists...">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search me-1"></i> Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Add Artist -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-person-plus me-2"></i>Add Artist (POST /api/ArtGalleryApi/artists)
+                    </div>
+                    <div class="card-body">
+                        <form id="addArtistForm" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" id="newArtistName" class="form-control" placeholder="Name *" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="email" id="newArtistEmail" class="form-control" placeholder="Email *" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="newArtistPhone" class="form-control" placeholder="Phone (e.g., +968 9123 4567)">
+                            </div>
+                            <div class="col-md-8">
+                                <textarea id="newArtistBio" class="form-control" placeholder="Bio (optional)"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-success w-100 h-100">
+                                    <i class="bi bi-person-plus me-1"></i> Add Artist
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Update/Delete Artist -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning">
+                        <i class="bi bi-pencil me-2"></i>Update/Delete Artist
+                    </div>
+                    <div class="card-body">
+                        <form id="updateArtistForm" class="row g-3">
+                            <div class="col-md-2">
+                                <input type="number" id="updateArtistId" class="form-control" placeholder="Artist ID *" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="updateArtistName" class="form-control" placeholder="New Name">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="updateArtistBio" class="form-control" placeholder="New Bio">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-warning w-100">Update</button>
+                            </div>
+                        </form>
+                        <hr>
+                        <form id="deleteArtistForm" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="number" id="deleteArtistId" class="form-control" placeholder="Artist ID to delete *" required>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash me-1"></i> Delete Artist
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="artistResults" class="mt-4"></div>
+            </div>
+
+            <!-- Exhibitions Tab -->
+            <div class="tab-pane fade" id="exhibitions" role="tabpanel">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-search me-2"></i>Search Exhibitions (GET /api/ArtGalleryApi/exhibitions)
+                    </div>
+                    <div class="card-body">
+                        <form id="searchExhibitionsForm" class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" id="exhibitionSearch" class="form-control" placeholder="Search exhibitions...">
+                            </div>
+                            <div class="col-md-3">
+                                <select id="exhibitionStatus" class="form-select">
+                                    <option value="">All Status</option>
+                                    <option value="0">Upcoming</option>
+                                    <option value="1">Active</option>
+                                    <option value="2">Ended</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search me-1"></i> Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="exhibitionResults" class="mt-4"></div>
+            </div>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div id="loading" class="loading text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Fetching data from API...</p>
+        </div>
+
+        <!-- API Response Log -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="bi bi-terminal me-2"></i>API Response Log
+            </div>
+            <div class="card-body">
+                <pre id="apiLog" class="bg-dark text-light p-3 rounded" style="max-height: 300px; overflow-y: auto;">// API responses will appear here...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_BASE = '/api/ArtGalleryApi';
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function log(message, data) {
+            const logEl = document.getElementById('apiLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logEl.textContent = `[${timestamp}] ${message}\n${JSON.stringify(data, null, 2)}\n\n` + logEl.textContent;
+        }
+
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.querySelector('.tab-content .tab-pane.active').insertAdjacentHTML('afterbegin', alertHtml);
+        }
+
+        // =====================
+        // ARTWORKS API
+        // =====================
+        document.getElementById('searchArtworksForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const params = new URLSearchParams({
+                searchTerm: document.getElementById('artworkSearch').value,
+                type: document.getElementById('artworkType').value,
+                sortBy: document.getElementById('artworkSort').value
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/artworks?${params}`);
+                const data = await response.json();
+                log('GET /artworks', data);
+                renderArtworks(data.data || []);
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to fetch artworks: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        document.getElementById('addArtworkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const artwork = {
+                title: document.getElementById('newArtworkTitle').value,
+                description: document.getElementById('newArtworkDescription').value,
+                type: document.getElementById('newArtworkType').value,
+                artistId: parseInt(document.getElementById('newArtworkArtistId').value),
+                price: parseFloat(document.getElementById('newArtworkPrice').value) || null,
+                isForSale: document.getElementById('newArtworkPrice').value ? true : false
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/artworks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(artwork)
+                });
+                const data = await response.json();
+                log('POST /artworks', data);
+                if (data.success) {
+                    showAlert('success', 'Artwork created successfully! ID: ' + data.data.id);
+                    e.target.reset();
+                } else {
+                    showAlert('danger', data.message || 'Failed to create artwork');
+                }
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to create artwork: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        document.getElementById('updateArtworkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const id = document.getElementById('updateArtworkId').value;
+            const update = {};
+            if (document.getElementById('updateArtworkTitle').value) {
+                update.title = document.getElementById('updateArtworkTitle').value;
+            }
+            if (document.getElementById('updateArtworkPrice').value) {
+                update.price = parseFloat(document.getElementById('updateArtworkPrice').value);
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/artworks/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(update)
+                });
+                const data = await response.json();
+                log('PUT /artworks/' + id, data);
+                if (data.success) {
+                    showAlert('success', 'Artwork updated successfully!');
+                } else {
+                    showAlert('warning', data.message || 'Failed to update artwork');
+                }
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to update artwork: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        document.getElementById('deleteArtworkForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to delete this artwork?')) return;
+            showLoading();
+            const id = document.getElementById('deleteArtworkId').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/artworks/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                log('DELETE /artworks/' + id, data);
+                if (data.success) {
+                    showAlert('success', 'Artwork deleted successfully!');
+                } else {
+                    showAlert('warning', data.message || 'Failed to delete artwork');
+                }
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to delete artwork: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        function renderArtworks(artworks) {
+            const container = document.getElementById('artworkResults');
+            if (!artworks.length) {
+                container.innerHTML = '<div class="alert alert-info">No artworks found.</div>';
+                return;
+            }
+            container.innerHTML = `
+                <h5>Found ${artworks.length} artworks</h5>
+                <div class="row g-3">
+                    ${artworks.map(a => `
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h6>${a.title}</h6>
+                                    <small class="text-muted">ID: ${a.id} | By: ${a.artistName}</small>
+                                    <p class="small mb-2">${a.description.substring(0, 100)}...</p>
+                                    <span class="badge bg-info">${a.type}</span>
+                                    <span class="badge bg-danger">${a.likes} likes</span>
+                                    ${a.price ? `<span class="badge bg-success">$${a.price}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // =====================
+        // ARTISTS API
+        // =====================
+        document.getElementById('searchArtistsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const params = new URLSearchParams({
+                searchTerm: document.getElementById('artistSearch').value
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/artists?${params}`);
+                const data = await response.json();
+                log('GET /artists', data);
+                renderArtists(data.data || []);
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to fetch artists: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        document.getElementById('addArtistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const artist = {
+                name: document.getElementById('newArtistName').value,
+                email: document.getElementById('newArtistEmail').value,
+                phone: document.getElementById('newArtistPhone').value,
+                bio: document.getElementById('newArtistBio').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/artists`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(artist)
+                });
+                const data = await response.json();
+                log('POST /artists', data);
+                if (data.success) {
+                    showAlert('success', 'Artist created successfully! ID: ' + data.data.id);
+                    e.target.reset();
+                } else {
+                    showAlert('danger', data.message || 'Failed to create artist');
+                }
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to create artist: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        document.getElementById('updateArtistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const id = document.getElementById('updateArtistId').value;
+            const update = {};
+            if (document.getElementById('updateArtistName').value) {
+                update.name = document.getElementById('updateArtistName').value;
+            }
+            if (document.getElementById('updateArtistBio').value) {
+                update.bio = document.getElementById('updateArtistBio').value;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/artists/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(update)
+                });
+                const data = await response.json();
+                log('PUT /artists/' + id, data);
+                if (data.success) {
+                    showAlert('success', 'Artist updated successfully!');
+                } else {
+                    showAlert('warning', data.message || 'Failed to update artist');
+                }
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to update artist: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        document.getElementById('deleteArtistForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!confirm('Are you sure you want to delete this artist? This will also delete all their artworks.')) return;
+            showLoading();
+            const id = document.getElementById('deleteArtistId').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/artists/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                log('DELETE /artists/' + id, data);
+                if (data.success) {
+                    showAlert('success', 'Artist deleted successfully!');
+                } else {
+                    showAlert('warning', data.message || 'Failed to delete artist');
+                }
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to delete artist: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        function renderArtists(artists) {
+            const container = document.getElementById('artistResults');
+            if (!artists.length) {
+                container.innerHTML = '<div class="alert alert-info">No artists found.</div>';
+                return;
+            }
+            container.innerHTML = `
+                <h5>Found ${artists.length} artists</h5>
+                <div class="row g-3">
+                    ${artists.map(a => `
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-body text-center">
+                                    <div class="bg-primary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center text-white" style="width:60px;height:60px;">
+                                        ${a.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <h6>${a.name}</h6>
+                                    <small class="text-muted">ID: ${a.id}</small>
+                                    <p class="small">${a.email}</p>
+                                    <span class="badge bg-info">${a.artworkCount} artworks</span>
+                                    <span class="badge bg-danger">${a.totalLikes} likes</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // =====================
+        // EXHIBITIONS API
+        // =====================
+        document.getElementById('searchExhibitionsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const params = new URLSearchParams({
+                searchTerm: document.getElementById('exhibitionSearch').value,
+                status: document.getElementById('exhibitionStatus').value
+            });
+
+            try {
+                const response = await fetch(`${API_BASE}/exhibitions?${params}`);
+                const data = await response.json();
+                log('GET /exhibitions', data);
+                renderExhibitions(data.data || []);
+            } catch (err) {
+                log('Error', err.message);
+                showAlert('danger', 'Failed to fetch exhibitions: ' + err.message);
+            }
+            hideLoading();
+        });
+
+        function renderExhibitions(exhibitions) {
+            const container = document.getElementById('exhibitionResults');
+            if (!exhibitions.length) {
+                container.innerHTML = '<div class="alert alert-info">No exhibitions found.</div>';
+                return;
+            }
+            container.innerHTML = `
+                <h5>Found ${exhibitions.length} exhibitions</h5>
+                <div class="row g-3">
+                    ${exhibitions.map(e => `
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <span class="badge bg-${e.status === 'Active' ? 'success' : e.status === 'Upcoming' ? 'info' : 'secondary'} mb-2">${e.status}</span>
+                                    <h6>${e.name}</h6>
+                                    <small class="text-muted">ID: ${e.id}</small>
+                                    <p class="small">${e.description.substring(0, 100)}...</p>
+                                    <p class="small mb-0">
+                                        <i class="bi bi-calendar"></i> ${new Date(e.startDate).toLocaleDateString()} - ${new Date(e.endDate).toLocaleDateString()}
+                                    </p>
+                                    <p class="small mb-0">
+                                        <i class="bi bi-geo-alt"></i> ${e.location || 'TBA'}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Load initial data
+        document.getElementById('searchArtworksForm').dispatchEvent(new Event('submit'));
+    </script>
+</body>
+</html>

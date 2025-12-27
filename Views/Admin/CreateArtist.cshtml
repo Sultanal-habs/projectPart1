@@ -1,0 +1,72 @@
+@model Artist
+@{
+    ViewData["Title"] = "Add New Artist";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-person-plus me-2"></i>Add New Artist</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateArtist" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Name" class="form-label">Artist Name <span class="text-danger">*</span></label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter artist name" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="artist@example.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label">Phone Number</label>
+                            <input asp-for="Phone" class="form-control" placeholder="+968 9123 4567" />
+                            <span asp-validation-for="Phone" class="text-danger"></span>
+                            <small class="text-muted">Format: +968 XXXX XXXX</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label">Status</label>
+                            <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<ArtistStatus>()"></select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ProfileImageUrl" class="form-label">Profile Image URL</label>
+                        <input asp-for="ProfileImageUrl" class="form-control" placeholder="https://example.com/image.jpg" />
+                        <span asp-validation-for="ProfileImageUrl" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Bio" class="form-label">Biography</label>
+                        <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Tell us about the artist..." maxlength="500"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                        <small class="text-muted">Maximum 500 characters</small>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Artists" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-2"></i>Create Artist
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

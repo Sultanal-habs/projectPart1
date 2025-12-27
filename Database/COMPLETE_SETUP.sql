@@ -1,11 +1,3 @@
--- ============================================
--- COMPLETE DATABASE SETUP - SINGLE FILE
--- Art Gallery Management System
--- Author: Sultan & Abdulla
--- ============================================
--- Run this entire script to create the complete database
--- Estimated execution time: 10-30 seconds
--- ============================================
 
 SET NOCOUNT ON;
 GO

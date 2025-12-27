@@ -1,0 +1,172 @@
+@model List<Artwork>
+@{
+    ViewData["Title"] = "Manage Artworks";
+    var artists = ViewBag.Artists as List<Artist>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3"><i class="bi bi-images me-2"></i>Manage Artworks</h1>
+    <a asp-action="CreateArtwork" class="btn btn-primary">
+        <i class="bi bi-plus-square me-2"></i>Add New Artwork
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Search</label>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search by title or description...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Artist</label>
+                <select name="artistId" class="form-select">
+                    <option value="">All Artists</option>
+                    @if (artists != null)
+                    {
+                        foreach (var artist in artists)
+                        {
+                            <option value="@artist.Id" selected="@(ViewBag.ArtistId != null && (int)ViewBag.ArtistId == artist.Id)">@artist.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="0" selected="@(ViewBag.Type == 0)">Painting</option>
+                    <option value="1" selected="@(ViewBag.Type == 1)">Photography</option>
+                    <option value="2" selected="@(ViewBag.Type == 2)">Handmade Craft</option>
+                    <option value="3" selected="@(ViewBag.Type == 3)">Sculpture</option>
+                    <option value="4" selected="@(ViewBag.Type == 4)">Digital Art</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Artworks Table -->
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Artist</th>
+                            <th>Type</th>
+                            <th>Price</th>
+                            <th>Likes</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var artwork in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(artwork.ImageUrl))
+                                    {
+                                        <img src="@artwork.ImageUrl" alt="@artwork.Title" style="width: 60px; height: 60px; object-fit: cover;" class="rounded">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                            <i class="bi bi-image text-white"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <strong>@artwork.Title</strong>
+                                    @if (artwork.IsForSale)
+                                    {
+                                        <span class="badge bg-success ms-1">For Sale</span>
+                                    }
+                                </td>
+                                <td>@artwork.Artist?.Name</td>
+                                <td><span class="badge bg-info">@artwork.Type</span></td>
+                                <td>@(artwork.Price.HasValue ? artwork.Price.Value.ToString("C") : "-")</td>
+                                <td><i class="bi bi-heart-fill text-danger"></i> @artwork.Likes</td>
+                                <td>
+                                    @switch (artwork.Status)
+                                    {
+                                        case ArtworkStatus.Active:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case ArtworkStatus.Pending:
+                                            <span class="badge bg-warning">Pending</span>
+                                            break;
+                                        case ArtworkStatus.Sold:
+                                            <span class="badge bg-primary">Sold</span>
+                                            break;
+                                        case ArtworkStatus.Archived:
+                                            <span class="badge bg-secondary">Archived</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@artwork.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a asp-action="EditArtwork" asp-route-id="@artwork.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal-@artwork.Id">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal-@artwork.Id" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <p>Are you sure you want to delete artwork <strong>@artwork.Title</strong>?</p>
+                                                    <p class="text-danger"><i class="bi bi-exclamation-triangle"></i> This action cannot be undone.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form asp-action="DeleteArtwork" asp-route-id="@artwork.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-muted">
+                Showing @Model.Count artworks
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-images display-4 text-muted"></i>
+                <p class="text-muted mt-3">No artworks found.</p>
+                <a asp-action="CreateArtwork" class="btn btn-primary">Add your first artwork</a>
+            </div>
+        }
+    </div>
+</div>

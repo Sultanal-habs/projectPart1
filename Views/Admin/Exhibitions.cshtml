@@ -1,0 +1,157 @@
+@model List<Exhibition>
+@{
+    ViewData["Title"] = "Manage Exhibitions";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3"><i class="bi bi-calendar-event me-2"></i>Manage Exhibitions</h1>
+    <a asp-action="CreateExhibition" class="btn btn-primary">
+        <i class="bi bi-calendar-plus me-2"></i>Add New Exhibition
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Search</label>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search by name or location...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="0" selected="@(ViewBag.Status == 0)">Upcoming</option>
+                    <option value="1" selected="@(ViewBag.Status == 1)">Active</option>
+                    <option value="2" selected="@(ViewBag.Status == 2)">Ended</option>
+                    <option value="3" selected="@(ViewBag.Status == 3)">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Exhibitions Table -->
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Exhibition</th>
+                            <th>Location</th>
+                            <th>Dates</th>
+                            <th>Max Artworks</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var exhibition in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(exhibition.BannerImageUrl))
+                                        {
+                                            <img src="@exhibition.BannerImageUrl" alt="@exhibition.Name" class="rounded me-2" style="width: 60px; height: 40px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-warning rounded me-2 d-flex align-items-center justify-content-center" style="width: 60px; height: 40px;">
+                                                <i class="bi bi-calendar-event"></i>
+                                            </div>
+                                        }
+                                        <div>
+                                            <strong>@exhibition.Name</strong>
+                                            <br><small class="text-muted">@(exhibition.Description.Length > 50 ? exhibition.Description.Substring(0, 50) + "..." : exhibition.Description)</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(exhibition.Location) ? "-" : exhibition.Location)</td>
+                                <td>
+                                    <small>
+                                        @exhibition.StartDate.ToString("MMM dd") - @exhibition.EndDate.ToString("MMM dd, yyyy")
+                                        <br>
+                                        <span class="text-muted">@exhibition.GetTotalDays() days</span>
+                                    </small>
+                                </td>
+                                <td>@exhibition.MaxArtworks</td>
+                                <td>
+                                    @switch (exhibition.Status)
+                                    {
+                                        case ExhibitionStatus.Upcoming:
+                                            <span class="badge bg-info">Upcoming</span>
+                                            break;
+                                        case ExhibitionStatus.Active:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case ExhibitionStatus.Ended:
+                                            <span class="badge bg-secondary">Ended</span>
+                                            break;
+                                        case ExhibitionStatus.Cancelled:
+                                            <span class="badge bg-danger">Cancelled</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a asp-action="EditExhibition" asp-route-id="@exhibition.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal-@exhibition.Id">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal-@exhibition.Id" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <p>Are you sure you want to delete exhibition <strong>@exhibition.Name</strong>?</p>
+                                                    <p class="text-danger"><i class="bi bi-exclamation-triangle"></i> This action cannot be undone.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form asp-action="DeleteExhibition" asp-route-id="@exhibition.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-muted">
+                Showing @Model.Count exhibitions
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-calendar-event display-4 text-muted"></i>
+                <p class="text-muted mt-3">No exhibitions found.</p>
+                <a asp-action="CreateExhibition" class="btn btn-primary">Add your first exhibition</a>
+            </div>
+        }
+    </div>
+</div>

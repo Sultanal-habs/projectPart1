@@ -236,9 +236,7 @@ GO
 PRINT 'Table ArtworkLikes created successfully!';
 GO
 
--- ============================================
--- Summary
--- ============================================
+
 PRINT '============================================';
 PRINT 'All tables created successfully!';
 PRINT 'Total tables: 6';

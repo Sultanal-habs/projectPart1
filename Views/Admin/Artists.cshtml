@@ -1,0 +1,159 @@
+@model List<Artist>
+@{
+    ViewData["Title"] = "Manage Artists";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3"><i class="bi bi-people me-2"></i>Manage Artists</h1>
+    <a asp-action="CreateArtist" class="btn btn-primary">
+        <i class="bi bi-person-plus me-2"></i>Add New Artist
+    </a>
+</div>
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Search</label>
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search by name or email...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="0" selected="@(ViewBag.Status == 0)">Active</option>
+                    <option value="1" selected="@(ViewBag.Status == 1)">Inactive</option>
+                    <option value="2" selected="@(ViewBag.Status == 2)">Suspended</option>
+                    <option value="3" selected="@(ViewBag.Status == 3)">Pending Approval</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Artists Table -->
+<div class="card">
+    <div class="card-body">
+        @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Artist</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Artworks</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var artist in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        @if (!string.IsNullOrEmpty(artist.ProfileImageUrl))
+                                        {
+                                            <img src="@artist.ProfileImageUrl" alt="@artist.Name" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-primary rounded-circle me-2 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                                @artist.Name.Substring(0, 1).ToUpper()
+                                            </div>
+                                        }
+                                        <div>
+                                            <strong>@artist.Name</strong>
+                                            @if (!string.IsNullOrEmpty(artist.Bio))
+                                            {
+                                                <br><small class="text-muted">@(artist.Bio.Length > 50 ? artist.Bio.Substring(0, 50) + "..." : artist.Bio)</small>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@artist.Email</td>
+                                <td>@(string.IsNullOrEmpty(artist.Phone) ? "-" : artist.Phone)</td>
+                                <td>
+                                    <span class="badge bg-info">@artist.GetTotalArtworks() artworks</span>
+                                    <span class="badge bg-danger">@artist.GetTotalLikes() likes</span>
+                                </td>
+                                <td>
+                                    @switch (artist.Status)
+                                    {
+                                        case ArtistStatus.Active:
+                                            <span class="badge bg-success">Active</span>
+                                            break;
+                                        case ArtistStatus.Inactive:
+                                            <span class="badge bg-secondary">Inactive</span>
+                                            break;
+                                        case ArtistStatus.Suspended:
+                                            <span class="badge bg-danger">Suspended</span>
+                                            break;
+                                        case ArtistStatus.PendingApproval:
+                                            <span class="badge bg-warning">Pending</span>
+                                            break;
+                                    }
+                                </td>
+                                <td>@artist.JoinedDate.ToString("MMM dd, yyyy")</td>
+                                <td class="text-end">
+                                    <div class="btn-group">
+                                        <a asp-action="EditArtist" asp-route-id="@artist.Id" class="btn btn-sm btn-outline-primary" title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Delete" 
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal-@artist.Id">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Delete Modal -->
+                                    <div class="modal fade" id="deleteModal-@artist.Id" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Confirm Delete</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-start">
+                                                    <p>Are you sure you want to delete artist <strong>@artist.Name</strong>?</p>
+                                                    <p class="text-danger"><i class="bi bi-exclamation-triangle"></i> This will also delete all their artworks (@artist.GetTotalArtworks() artworks).</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <form asp-action="DeleteArtist" asp-route-id="@artist.Id" method="post" class="d-inline">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-danger">Delete</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-muted">
+                Showing @Model.Count artists
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-people display-4 text-muted"></i>
+                <p class="text-muted mt-3">No artists found.</p>
+                <a asp-action="CreateArtist" class="btn btn-primary">Add your first artist</a>
+            </div>
+        }
+    </div>
+</div>

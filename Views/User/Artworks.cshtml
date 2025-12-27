@@ -1,0 +1,142 @@
+@model List<Artwork>
+@{
+    ViewData["Title"] = "Browse Artworks";
+    Layout = "_UserLayout";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-images me-2"></i>Browse Artworks</h1>
+        <span class="badge bg-primary fs-6">@ViewBag.TotalCount artworks</span>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search</label>
+                    <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Search artworks...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Type</label>
+                    <select name="type" class="form-select">
+                        <option value="">All Types</option>
+                        <option value="0" selected="@(ViewBag.Type == 0)">Painting</option>
+                        <option value="1" selected="@(ViewBag.Type == 1)">Photography</option>
+                        <option value="2" selected="@(ViewBag.Type == 2)">Handmade Craft</option>
+                        <option value="3" selected="@(ViewBag.Type == 3)">Sculpture</option>
+                        <option value="4" selected="@(ViewBag.Type == 4)">Digital Art</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Artist</label>
+                    <select name="artistId" class="form-select">
+                        <option value="">All Artists</option>
+                        @if (ViewBag.Artists != null)
+                        {
+                            foreach (var artist in ViewBag.Artists)
+                            {
+                                <option value="@artist.Id" selected="@(ViewBag.ArtistId != null && (int)ViewBag.ArtistId == artist.Id)">@artist.Name</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Sort By</label>
+                    <select name="sortBy" class="form-select">
+                        <option value="newest" selected="@(ViewBag.SortBy == "newest")">Newest</option>
+                        <option value="oldest" selected="@(ViewBag.SortBy == "oldest")">Oldest</option>
+                        <option value="mostLiked" selected="@(ViewBag.SortBy == "mostLiked")">Most Liked</option>
+                        <option value="title" selected="@(ViewBag.SortBy == "title")">Title A-Z</option>
+                        <option value="priceAsc" selected="@(ViewBag.SortBy == "priceAsc")">Price: Low to High</option>
+                        <option value="priceDesc" selected="@(ViewBag.SortBy == "priceDesc")">Price: High to Low</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <div class="form-check mt-4">
+                        <input type="checkbox" name="forSale" value="true" class="form-check-input" @(ViewBag.ForSale == true ? "checked" : "")>
+                        <label class="form-check-label">For Sale</label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-2"></i>Search
+                    </button>
+                    <a asp-action="Artworks" class="btn btn-outline-secondary">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Artworks Grid -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var artwork in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card artwork-card h-100">
+                        <div class="position-relative">
+                            @if (!string.IsNullOrEmpty(artwork.ImageUrl))
+                            {
+                                <img src="@artwork.ImageUrl" class="card-img-top" alt="@artwork.Title" style="height: 220px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 220px;">
+                                    <i class="bi bi-image text-muted display-3"></i>
+                                </div>
+                            }
+                            @if (artwork.IsNew())
+                            {
+                                <span class="position-absolute top-0 start-0 m-2 badge bg-success">New</span>
+                            }
+                            @if (artwork.IsForSale)
+                            {
+                                <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark">For Sale</span>
+                            }
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">@artwork.Title</h5>
+                            <p class="card-text small text-muted mb-2">
+                                <a asp-action="ArtistDetails" asp-route-id="@artwork.ArtistId" class="text-decoration-none">
+                                    <i class="bi bi-person"></i> @artwork.Artist?.Name
+                                </a>
+                            </p>
+                            <p class="card-text small">
+                                @(artwork.Description.Length > 100 ? artwork.Description.Substring(0, 100) + "..." : artwork.Description)
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <span class="badge bg-info">@artwork.Type</span>
+                                <span class="text-danger">
+                                    <i class="bi bi-heart-fill"></i> @artwork.Likes
+                                </span>
+                            </div>
+                            @if (artwork.IsForSale && artwork.Price.HasValue)
+                            {
+                                <div class="mt-2">
+                                    <strong class="text-success">@artwork.Price.Value.ToString("C") OMR</strong>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-action="ArtworkDetails" asp-route-id="@artwork.Id" class="btn btn-primary w-100">
+                                <i class="bi bi-eye me-2"></i>View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-search display-1 text-muted"></i>
+            <h3 class="mt-3">No artworks found</h3>
+            <p class="text-muted">Try adjusting your search or filter criteria.</p>
+            <a asp-action="Artworks" class="btn btn-primary">View All Artworks</a>
+        </div>
+    }
+</div>

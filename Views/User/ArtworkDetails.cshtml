@@ -1,0 +1,179 @@
+@model Artwork
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_UserLayout";
+    var relatedArtworks = ViewBag.RelatedArtworks as List<Artwork>;
+    var hasLiked = ViewBag.HasLiked ?? false;
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-action="Artworks">Artworks</a></li>
+            <li class="breadcrumb-item active">@Model.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Artwork Image -->
+        <div class="col-lg-6">
+            <div class="card">
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Title" style="max-height: 500px; object-fit: contain;">
+                }
+                else
+                {
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                        <i class="bi bi-image text-muted display-1"></i>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Artwork Details -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <span class="badge bg-info mb-2">@Model.Type</span>
+                            @if (Model.IsNew())
+                            {
+                                <span class="badge bg-success mb-2">New</span>
+                            }
+                            @if (Model.IsForSale)
+                            {
+                                <span class="badge bg-warning text-dark mb-2">For Sale</span>
+                            }
+                        </div>
+                        <div class="text-end">
+                            <span class="fs-5 text-danger">
+                                <i class="bi bi-heart-fill"></i> @Model.Likes likes
+                            </span>
+                        </div>
+                    </div>
+
+                    <h1 class="h2 mb-3">@Model.Title</h1>
+
+                    <!-- Artist Info -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                        @if (Model.Artist != null && !string.IsNullOrEmpty(Model.Artist.ProfileImageUrl))
+                        {
+                            <img src="@Model.Artist.ProfileImageUrl" alt="@Model.Artist?.Name" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 60px; height: 60px;">
+                                @(Model.Artist?.Name.Substring(0, 1).ToUpper() ?? "?")
+                            </div>
+                        }
+                        <div>
+                            <h5 class="mb-0">@Model.Artist?.Name</h5>
+                            <a asp-action="ArtistDetails" asp-route-id="@Model.ArtistId" class="text-decoration-none">
+                                View Profile <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <h5>Description</h5>
+                    <p class="text-muted">@Model.Description</p>
+
+                    <!-- Price -->
+                    @if (Model.IsForSale && Model.Price.HasValue)
+                    {
+                        <div class="alert alert-success">
+                            <h4 class="alert-heading mb-0">
+                                <i class="bi bi-tag me-2"></i>Price: @Model.Price.Value.ToString("C") OMR
+                            </h4>
+                        </div>
+                    }
+
+                    <!-- Details List -->
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Type:</span>
+                            <strong>@Model.Type</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Created:</span>
+                            <strong>@Model.CreatedDate.ToString("MMMM dd, yyyy")</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>Status:</span>
+                            <strong>@Model.Status</strong>
+                        </li>
+                        @if (Model.Exhibition != null)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Exhibition:</span>
+                                <a asp-action="ExhibitionDetails" asp-route-id="@Model.ExhibitionId">@Model.Exhibition.Name</a>
+                            </li>
+                        }
+                    </ul>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2">
+                        @if (hasLiked)
+                        {
+                            <form asp-action="UnlikeArtwork" asp-route-id="@Model.Id" method="post" class="flex-grow-1">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="bi bi-heart-fill me-2"></i>Unlike
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="LikeArtwork" asp-route-id="@Model.Id" method="post" class="flex-grow-1">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger w-100">
+                                    <i class="bi bi-heart me-2"></i>Like this Artwork
+                                </button>
+                            </form>
+                        }
+                        <button class="btn btn-outline-secondary" onclick="navigator.share ? navigator.share({title: '@Model.Title', url: window.location.href}) : alert('Share not supported')">
+                            <i class="bi bi-share"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Artworks -->
+    @if (relatedArtworks != null && relatedArtworks.Any())
+    {
+        <section class="mt-5">
+            <h3><i class="bi bi-collection me-2"></i>Related Artworks</h3>
+            <div class="row g-4 mt-2">
+                @foreach (var artwork in relatedArtworks)
+                {
+                    <div class="col-md-3">
+                        <div class="card artwork-card h-100">
+                            @if (!string.IsNullOrEmpty(artwork.ImageUrl))
+                            {
+                                <img src="@artwork.ImageUrl" class="card-img-top" alt="@artwork.Title" style="height: 150px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                    <i class="bi bi-image text-muted"></i>
+                                </div>
+                            }
+                            <div class="card-body">
+                                <h6 class="card-title">@artwork.Title</h6>
+                                <small class="text-muted">@artwork.Artist?.Name</small>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a asp-action="ArtworkDetails" asp-route-id="@artwork.Id" class="btn btn-sm btn-outline-primary w-100">View</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
+</div>

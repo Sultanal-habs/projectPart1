@@ -1,0 +1,164 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3"><i class="bi bi-speedometer2 me-2"></i>Dashboard</h1>
+    <span class="text-muted">Welcome, @Context.Session.GetString("Username")</span>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Total Artists</h6>
+                        <h2 class="card-title mb-0">@Model.TotalArtists</h2>
+                    </div>
+                    <i class="bi bi-people display-4 opacity-50"></i>
+                </div>
+                <small class="opacity-75">@Model.ActiveArtists active</small>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-action="Artists" class="text-white text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Total Artworks</h6>
+                        <h2 class="card-title mb-0">@Model.TotalArtworks</h2>
+                    </div>
+                    <i class="bi bi-images display-4 opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-action="Artworks" class="text-white text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-warning text-dark h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Exhibitions</h6>
+                        <h2 class="card-title mb-0">@Model.TotalExhibitions</h2>
+                    </div>
+                    <i class="bi bi-calendar-event display-4 opacity-50"></i>
+                </div>
+                <small class="opacity-75">@Model.ActiveExhibitions active</small>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <a asp-action="Exhibitions" class="text-dark text-decoration-none small">
+                    View all <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-subtitle mb-2 opacity-75">Total Users</h6>
+                        <h2 class="card-title mb-0">@Model.TotalUsers</h2>
+                    </div>
+                    <i class="bi bi-person-check display-4 opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0">
+                <span class="text-white small">Registered users</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <a asp-action="CreateArtist" class="btn btn-outline-primary btn-lg w-100 py-3">
+            <i class="bi bi-person-plus me-2"></i> Add New Artist
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-action="CreateArtwork" class="btn btn-outline-success btn-lg w-100 py-3">
+            <i class="bi bi-plus-square me-2"></i> Add New Artwork
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a asp-action="CreateExhibition" class="btn btn-outline-warning btn-lg w-100 py-3">
+            <i class="bi bi-calendar-plus me-2"></i> Add New Exhibition
+        </a>
+    </div>
+</div>
+
+<!-- Recent Artworks -->
+<div class="card">
+    <div class="card-header bg-white">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent Artworks</h5>
+    </div>
+    <div class="card-body">
+        @if (Model.RecentArtworks.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Title</th>
+                            <th>Artist</th>
+                            <th>Type</th>
+                            <th>Likes</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var artwork in Model.RecentArtworks)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(artwork.ImageUrl))
+                                    {
+                                        <img src="@artwork.ImageUrl" alt="@artwork.Title" style="width: 50px; height: 50px; object-fit: cover;" class="rounded">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-image text-white"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@artwork.Title</td>
+                                <td>@artwork.Artist?.Name</td>
+                                <td><span class="badge bg-secondary">@artwork.Type</span></td>
+                                <td><i class="bi bi-heart-fill text-danger"></i> @artwork.Likes</td>
+                                <td>@artwork.CreatedDate.ToString("MMM dd, yyyy")</td>
+                                <td>
+                                    <a asp-action="EditArtwork" asp-route-id="@artwork.Id" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted text-center py-4">No artworks found. <a asp-action="CreateArtwork">Add one now!</a></p>
+        }
+    </div>
+</div>
